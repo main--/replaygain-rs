@@ -1,0 +1,10 @@
+[package]
+name = "replaygain"
+description = "Analyze audio data to get the ReplayGain tags (gain, peak)."
+repository = "https://github.com/main--/replaygain-rs"
+documentation = "https://docs.rs/replaygain"
+license = "LGPL-2.1"
+version = "1.0.0"
+authors = ["main() <main@ehvag.de>"]
+
+[dependencies]
