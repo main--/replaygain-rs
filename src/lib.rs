@@ -84,7 +84,7 @@ impl ReplayGain {
     /// in **floats**. Note that because we expect stereo audio, this means that you
     /// need to divide this by 2 to get the number of *samples*.
     pub fn frame_size(&self) -> usize {
-        self.sample_rate / 10
+        self.sample_rate / 20 * 2
     }
 
     /// Processes a single audio frame.
