@@ -127,7 +127,7 @@ impl ReplayGain {
         }
 
         for chunk in remainder.iter().flat_map(|x| x.chunks(frame_size)) {
-            if chunk.len() == self.frame_size() {
+            if chunk.len() == frame_size {
                 assert!(self.buf.is_empty());
                 filter_frame(&mut self.ctx, chunk);
             } else {
@@ -139,8 +139,10 @@ impl ReplayGain {
 
     /// Completes the analysis and returns the two replaygain values (gain, peak).
     pub fn finish(mut self) -> (f32, f32) {
-        // FIXME: handle the remaining data in self.buf
-        // not sure how ffmpeg deals with this
+        // pass in any remaining buffer after padding with zeros
+        self.buf.resize(self.frame_size(), 0.0);
+        filter_frame(&mut self.ctx, &self.buf[..]);
+        self.buf.clear();
 
         finish(&mut self.ctx)
     }
