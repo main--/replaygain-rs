@@ -74,7 +74,7 @@ impl ReplayGain {
     /// Returns `None` if the sample rate is not supported.
     pub fn new(sample_rate: usize) -> Option<ReplayGain>{
         freq_to_info(sample_rate).map(|x| ReplayGain {
-            sample_rate: sample_rate,
+            sample_rate,
             ctx: init_context(&x),
             buf: Vec::new(),
         })
@@ -118,7 +118,7 @@ impl ReplayGain {
             self.buf.extend_from_slice(&frame[..input]);
             if can_fill {
                 assert!(self.buf.len() == frame_size);
-                filter_frame(&mut self.ctx, &mut self.buf[..]);
+                filter_frame(&mut self.ctx, &self.buf[..]);
                 self.buf.clear();
                 remainder = Some(&frame[input..]);
             }
