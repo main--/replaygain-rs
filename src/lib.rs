@@ -74,7 +74,7 @@ impl ReplayGain {
     /// Returns `None` if the sample rate is not supported.
     pub fn new(sample_rate: usize) -> Option<ReplayGain>{
         freq_to_info(sample_rate).map(|x| ReplayGain {
-            sample_rate: sample_rate,
+            sample_rate,
             ctx: init_context(&x),
             buf: Vec::new(),
         })
@@ -84,7 +84,7 @@ impl ReplayGain {
     /// in **floats**. Note that because we expect stereo audio, this means that you
     /// need to divide this by 2 to get the number of *samples*.
     pub fn frame_size(&self) -> usize {
-        self.sample_rate / 10
+        self.sample_rate / 20 * 2
     }
 
     /// Processes a single audio frame.
@@ -118,7 +118,7 @@ impl ReplayGain {
             self.buf.extend_from_slice(&frame[..input]);
             if can_fill {
                 assert!(self.buf.len() == frame_size);
-                filter_frame(&mut self.ctx, &mut self.buf[..]);
+                filter_frame(&mut self.ctx, &self.buf[..]);
                 self.buf.clear();
                 remainder = Some(&frame[input..]);
             }
@@ -127,7 +127,7 @@ impl ReplayGain {
         }
 
         for chunk in remainder.iter().flat_map(|x| x.chunks(frame_size)) {
-            if chunk.len() == self.frame_size() {
+            if chunk.len() == frame_size {
                 assert!(self.buf.is_empty());
                 filter_frame(&mut self.ctx, chunk);
             } else {
@@ -139,8 +139,10 @@ impl ReplayGain {
 
     /// Completes the analysis and returns the two replaygain values (gain, peak).
     pub fn finish(mut self) -> (f32, f32) {
-        // FIXME: handle the remaining data in self.buf
-        // not sure how ffmpeg deals with this
+        // pass in any remaining buffer after padding with zeros
+        self.buf.resize(self.frame_size(), 0.0);
+        filter_frame(&mut self.ctx, &self.buf[..]);
+        self.buf.clear();
 
         finish(&mut self.ctx)
     }

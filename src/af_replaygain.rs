@@ -642,7 +642,7 @@ pub fn filter_frame(ctx: &mut ReplayGainContext, frame: &[f32]) {
     calc_stereo_peak(frame, &mut ctx.peak);
     yule_filter_stereo_samples(ctx, frame, &mut buf[..]);
     butter_filter_stereo_samples(ctx, &mut buf[..]);
-    let level = (100f64 * calc_stereo_rms(&mut buf[..])).floor() as usize;
+    let level = (100f64 * calc_stereo_rms(&buf[..])).floor() as usize;
 
     ctx.histogram[clip(level, 0, HISTOGRAM_SLOTS - 1)] += 1;
 //    return ff_filter_frame(outlink, in);
